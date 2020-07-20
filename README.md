@@ -12,7 +12,8 @@ Just download and include centrifuge.js into your web page using `script` tag:
 Create new `Centrifuge` object instance, subscribe on channel and call `.connect()` method to make actual connection to server:
 
 ```javascript
-var centrifuge = new myCentrifuge('ws://centrifuge.example.com/connection/websocket');
+var
+centrifuge = new myCentrifuge('ws://centrifuge.example.com/connection/websocket');
 
 centrifuge.subscribe("news", function(message) {
   console.log(message);
