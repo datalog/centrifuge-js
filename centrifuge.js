@@ -94,26 +94,28 @@ function myCentrifuge( url, configuration ) {
 
 	function addListener( target, type, listener, prepend ) {
 
-		var m;
-		var events;
-		var existing;
-
 		if('function' !== typeof listener ) {
+
 			throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
 		}
 
+		var
+		m = 10,
+
+		existing,
 		events = target._events;
+
 		if( undefined === events ) {
 
-			events = target._events = Object.create(null);
+			events = target._events = Object.create( null );
 			target._eventsCount = 0;
 
 		} else {
 			// To avoid recursion in the case that type === "newListener"! Before
 			// adding it to the listeners, first emit "newListener".
 			if( undefined !== events.newListener ) {
-				target.emit('newListener', type,
-										listener.listener ? listener.listener : listener);
+
+				target.emit('newListener', type, listener.listener ? listener.listener : listener );
 
 				// Re-assign `events` because a newListener handler could have caused the
 				// this._events to be assigned to a new object
@@ -127,6 +129,7 @@ function myCentrifuge( url, configuration ) {
 			existing = events[ type ] = listener;
 			++target._eventsCount;
 		} else {
+
 			if('function' === typeof existing ) {
 				// Adding the second element, need to change to array.
 				existing = events[ type ] =
@@ -141,17 +144,19 @@ function myCentrifuge( url, configuration ) {
 			}
 
 			// Check for listener leak
-			m = $getMaxListeners( target );
+			//m = $getMaxListeners( target );
 
 			if( m > 0 && existing.length > m && !existing.warned ) {
 
 				existing.warned = true;
 				// No error code for this since it is a Warning
 				// eslint-disable-next-line no-restricted-syntax
-				var w = new Error('Possible EventEmitter memory leak detected. ' +
-														existing.length + ' ' + String(type) + ' listeners ' +
-														'added. Use emitter.setMaxListeners() to ' +
-														'increase limit');
+				var
+				w = new Error('Possible EventEmitter memory leak detected. ' +
+						existing.length + ' ' + String(type) + ' listeners ' +
+						'added. Use emitter.setMaxListeners() to ' +
+						'increase limit');
+
 				w.name = 'MaxListenersExceededWarning';
 				w.emitter = target;
 				w.type = type;
