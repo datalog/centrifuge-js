@@ -161,7 +161,8 @@ function myCentrifuge( url, configuration ) {
 				w.emitter = target;
 				w.type = type;
 				w.count = existing.length;
-				ProcessEmitWarning( w );
+
+				console.warn( w );
 			}
 		}
 
@@ -240,8 +241,10 @@ function myCentrifuge( url, configuration ) {
 			encodedCommands = [];
 
 			for( var i in commands ) {
+
 				if(commands.hasOwnProperty( i ) ) {
-					encodedCommands.push(JSON.stringify(commands[ i ]));
+
+					encodedCommands.push( JSON.stringify( commands[ i ] ) );
 				}
 			}
 			return encodedCommands.join('\n');
