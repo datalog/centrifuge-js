@@ -12,7 +12,7 @@ function myCentrifuge( url, configuration ) {
 		? R.apply
 		: function ReflectApply( target, receiver, args ) {
 
-			return Function.prototype.apply.call(target, receiver, args);
+			return Function.prototype.apply.call( target, receiver, args );
 		};
 
 	function emit( type ) {
@@ -310,7 +310,7 @@ function myCentrifuge( url, configuration ) {
 	,_STATE_SUBSCRIBING		=  1
 	,_STATE_SUCCESS			=  2
 	,_STATE_ERROR			=  3
-	,_STATE_UNSUBSCRIBED		=  4
+	,_STATE_UNSUBSCRIBED		=  4;
 
 	function Subscription( centrifuge, channel, events ) {
 
