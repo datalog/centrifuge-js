@@ -15,8 +15,10 @@ Create new `Centrifuge` object instance, subscribe on channel and call `.connect
 var
 centrifuge = new myCentrifuge('ws://centrifuge.example.com/connection/websocket');
 
-centrifuge.subscribe("news", function(message) {
-  console.log(message);
+centrifuge.subscribe("news", function( msg ) {
+
+  console.log( msg );
+
 });
 
 centrifuge.connect();
