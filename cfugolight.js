@@ -29,7 +29,7 @@
 
 var
  tk = '[[[TOKEN]]]' /* <-- should be issued by server */
-,cn = 'channel name'
+,cn = 'news' /* <-- channel name */
 ,ws = new WebSocket('ws://centrifuge.example.com/connection/websocket');
 
 ws._msgcounter = 0;
