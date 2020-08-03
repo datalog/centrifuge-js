@@ -27,7 +27,7 @@ centrifuge.connect();
 Check original documentation if needed.
 
 
-## Simple receive messages from Centrifuge server
+## Just receive messages from Centrifuge server
 
 You can do this with vanilla js (no `centrifuge.js` needed):
 https://github.com/datalog/centrifuge-js/blob/master/cfugolight.js
