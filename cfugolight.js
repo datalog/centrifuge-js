@@ -10,7 +10,6 @@
 */
 /**
 	Centrifuge API:
-
 	CONNECT		:  0
 	SUBSCRIBE	:  1
 	UNSUBSCRIBE	:  2
@@ -28,60 +27,152 @@
 'use strict';
 
 var
- tk = '[[[TOKEN]]]' /* <-- should be issued by server */
-,cn = 'news' /* <-- channel name */
-,ws = new WebSocket('ws://centrifuge.example.com/connection/websocket');
+ url = 'ws://centrifuge.example.com/connection/websocket'
+,cnl = 'news' /* <-- channel name */
+,tkn = '[[[TOKEN]]]' /* <-- should be issued by server */
+;
 
-ws._msgcounter = 0;
+___cfupdate();
 
-function wspush( msg ) {
-
-	msg.id = ++ws._msgcounter;
-	ws.send( JSON.stringify( msg ) );
-};
-
-ws.onopen = function() {
-
-	wspush( {
-
-			 params : {
-
-				token : tk
-			}
-			/*,method :  0 */
-	} );
-};
-
-ws.onmessage = function( ev ) {
-
-	var
-	msg = {};
+function ___parsejsondata( d ) {
 
 	try {
-		msg = JSON.parse( ev.data || {} );
+
+		return JSON.parse( d );
 
 	} catch( e ) {}
 
-	var
-	result = msg.result || {},
-	client = result.client,
-	data = result.data;
+	return {};
+};
 
-	if( client ) {
+function ___decodedata( data ) {
+
+	var
+	msgs = [];
+
+	data.split('\n').forEach( function( d ) {
+
+		if( d ) {
+
+			msgs.push( ___parsejsondata( d ) );
+		}
+	} );
+
+	return msgs;
+}
+
+function ___cfupdate( attempt ) {
+
+	var
+	ws = new WebSocket( url ),
+
+	maxdelay = 25,
+	attempt = ( attempt ) ? attempt : 1,
+
+	_msgcounter = 0,
+	_revive = 1;
+
+	function ecc( error ) {
+
+		var
+		err = error.code,
+		msg = error.message,
+
+		actions = {
+
+			109 : function() {
+
+				console.log('wsocket error [ ' + msg + ' ]');
+
+				_revive = 0;
+				ws.close();
+
+				return false;
+			}
+		};
+
+		return actions[ err ] ? actions[ err ]() : false;
+	}
+
+	function wspush( msg ) {
+
+		msg.id = ++_msgcounter;
+		ws.send( JSON.stringify( msg ) );
+	};
+
+	ws.onclose = function( e ) {
+
+		console.log('wsocked was closed [ ' + e.code + ' ]');
+
+		var
+		reconnect = ___parsejsondata( e.reason ).reconnect;
+
+		if( _revive || reconnect ) {
+
+			setTimeout( function() {
+
+				___cfupdate( ++attempt );
+
+			}, !reconnect * (( attempt > maxdelay ) ? maxdelay : attempt ) * 1000 );
+		}
+	};
+
+	ws.onerror = function() {
+
+		_revive = 1;
+	};
+
+	ws.onopen = function() {
+
+		attempt = 0;
 
 		wspush( {
+				 params : {
 
-			 params : {
-
-				channel : cn
-			}
-			,method : 1
+					token : tkn
+				 }
+			  	/** method : 0 */
 		} );
+	};
 
-	} else
+	ws.onmessage = function( e ) {
 
-	if( data ) {
+		/** CAUTION! We can receive more than one line */
+		___decodedata( e.data ).forEach( function( msg ) {
 
-		/* MESSAGE FROM SERVER RECEIVED */
-	}
-};
+			var
+			error = msg.error || 0,
+
+			result = msg.result || {},
+			client = result.client,
+			data = result.data;
+
+
+			if( error ) {
+
+				/** error code and explanation comes as a last cry with json */
+				return ecc( error );
+			}
+
+			if( client ) {
+
+				wspush( {
+
+
+					 params : {
+
+						channel : cnl
+					 }
+					,method : 1
+				} );
+
+			} else
+
+			if( data ) {
+
+				/* MESSAGE FROM CFSERVER RECEIVED */
+				console.log( data );
+			}
+		} );
+	};
+}
